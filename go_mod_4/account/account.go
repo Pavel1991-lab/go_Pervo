@@ -2,27 +2,28 @@ package account
 
 import (
 	"errors"
-	"fmt"
 	"math/rand/v2"
 	"net/url"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 var leterRunes = []rune("abcdefgh123")
 
-type account struct {
+type Account struct {
 	login    string
 	password string
 	url      string
 }
 
-type accountWithTimeStamp struct {
+type AccountWithTimeStamp struct {
 	creat  time.Time
 	update time.Time
-	account
+	Account
 }
 
-func newAccountwithtimeStamp(login, password, urlString string) (*accountWithTimeStamp, error) {
+func NewAccountWithTimeStamp(login, password, urlString string) (*AccountWithTimeStamp, error) {
 
 	if login == "" {
 		return nil, errors.New("invallogin")
@@ -32,10 +33,10 @@ func newAccountwithtimeStamp(login, password, urlString string) (*accountWithTim
 		return nil, errors.New("Invalid Url")
 	}
 
-	newAcc := &accountWithTimeStamp{
+	newAcc := &AccountWithTimeStamp{
 		creat:  time.Now(),
 		update: time.Now(),
-		account: account{
+		Account: Account{
 			url:      urlString,
 			login:    login,
 			password: password,
@@ -47,11 +48,12 @@ func newAccountwithtimeStamp(login, password, urlString string) (*accountWithTim
 	return newAcc, nil
 }
 
-func (acc account) outputPassword() {
-	fmt.Println(acc.login, acc.password, acc.url)
+func (acc Account) OutputPassword() {
+	color.Cyan(acc.login)
+	// fmt.Println(acc.login, acc.password, acc.url)
 }
 
-func (acc *account) generatePassword(n int) {
+func (acc *Account) generatePassword(n int) {
 	res := make([]rune, n)
 	for i := range res {
 		res[i] = leterRunes[rand.IntN(len(leterRunes))]
