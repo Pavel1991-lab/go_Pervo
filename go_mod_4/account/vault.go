@@ -2,12 +2,16 @@ package account
 
 import (
 	"encoding/json"
-	"main/files"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
 )
+
+type Db interface {
+	Read() ([]byte, error)
+	Wright([]byte)
+}
 
 type Vault struct {
 	Accounts []Account `json:"accounts"`
@@ -16,10 +20,10 @@ type Vault struct {
 
 type VaultWithDb struct {
 	Vault
-	db files.JsonDb
+	db Db
 }
 
-func NewVault(db *files.JsonDb) *VaultWithDb {
+func NewVault(db Db) *VaultWithDb {
 	file, err := db.Read()
 	if err != nil {
 		// Если не удалось прочитать файл — создаём пустой Vault
@@ -28,7 +32,7 @@ func NewVault(db *files.JsonDb) *VaultWithDb {
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: *db,
+			db: db,
 		}
 	}
 
@@ -42,14 +46,14 @@ func NewVault(db *files.JsonDb) *VaultWithDb {
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: *db,
+			db: db,
 		}
 	}
 
 	// Если всё ок — возвращаем загруженный Vault
 	return &VaultWithDb{
 		Vault: vault,
-		db:    *db,
+		db:    db,
 	}
 }
 
