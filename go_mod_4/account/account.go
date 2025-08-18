@@ -12,18 +12,14 @@ import (
 var leterRunes = []rune("abcdefgh123")
 
 type Account struct {
-	login    string
-	password string
-	url      string
+	Login    string    `json:"login`
+	Password string    `json:"password"`
+	Url      string    `json:"url"`
+	Creat    time.Time `json:"creat"`
+	Update   time.Time `json:"update"`
 }
 
-type AccountWithTimeStamp struct {
-	creat  time.Time
-	update time.Time
-	Account
-}
-
-func NewAccountWithTimeStamp(login, password, urlString string) (*AccountWithTimeStamp, error) {
+func NewAccount(login, password, urlString string) (*Account, error) {
 
 	if login == "" {
 		return nil, errors.New("invallogin")
@@ -33,23 +29,25 @@ func NewAccountWithTimeStamp(login, password, urlString string) (*AccountWithTim
 		return nil, errors.New("Invalid Url")
 	}
 
-	newAcc := &AccountWithTimeStamp{
-		creat:  time.Now(),
-		update: time.Now(),
-		Account: Account{
-			url:      urlString,
-			login:    login,
-			password: password,
-		},
+	newAcc := &Account{
+		Creat:    time.Now(),
+		Update:   time.Now(),
+		Url:      urlString,
+		Login:    login,
+		Password: password,
 	}
+
 	if password == "" {
 		newAcc.generatePassword(4)
 	}
 	return newAcc, nil
 }
 
-func (acc Account) OutputPassword() {
-	color.Cyan(acc.login)
+func (acc *Account) Output() {
+	color.Cyan(acc.Login)
+	color.Cyan(acc.Password)
+	color.Cyan(acc.Url)
+
 	// fmt.Println(acc.login, acc.password, acc.url)
 }
 
@@ -58,5 +56,5 @@ func (acc *Account) generatePassword(n int) {
 	for i := range res {
 		res[i] = leterRunes[rand.IntN(len(leterRunes))]
 	}
-	acc.password = string(res)
+	acc.Password = string(res)
 }
