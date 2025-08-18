@@ -8,9 +8,17 @@ import (
 	"github.com/fatih/color"
 )
 
-type Db interface {
+type ByteReader interface {
 	Read() ([]byte, error)
-	Wright([]byte)
+}
+
+type ByteWriter interface {
+	Write([]byte)
+}
+
+type Db interface {
+	ByteReader
+	ByteWriter
 }
 
 type Vault struct {
@@ -105,5 +113,5 @@ func (vault *VaultWithDb) save() {
 	if err != nil {
 		color.Red("Do not unmarshal")
 	}
-	vault.db.Wright(data)
+	vault.db.Write(data)
 }
