@@ -2,6 +2,7 @@ package account
 
 import (
 	"encoding/json"
+	"main/output"
 	"strings"
 	"time"
 
@@ -111,7 +112,7 @@ func (vault *VaultWithDb) save() {
 	vault.UpdateAt = time.Now()
 	data, err := vault.Vault.ToBytes()
 	if err != nil {
-		color.Red("Do not unmarshal")
+		output.PrintError("Do not unmarshal")
 	}
 	vault.db.Write(data)
 }
