@@ -1,9 +1,10 @@
 package files
 
 import (
-	"fmt"
 	"main/output"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 type JsonDb struct {
@@ -37,5 +38,5 @@ func (db *JsonDb) Write(content []byte) {
 		output.PrintError(err)
 		return
 	}
-	fmt.Println("Wright Ok")
+	color.Green("Write Ok!")
 }

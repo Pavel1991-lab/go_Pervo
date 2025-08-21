@@ -28,3 +28,7 @@ func PrintError(value any) {
 	// 	color.Red("Undefind error")
 	// }
 }
+
+func sum(a, b int) int {
+	return a + b
+}

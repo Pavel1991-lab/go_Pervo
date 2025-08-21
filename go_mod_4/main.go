@@ -14,13 +14,19 @@ func main() {
 	vault := account.NewVault(files.NewJsonDb(("data.json")))
 Menu:
 	for {
-		variant := getMenu()
+		variant := promptData([]string{
+			"1. createAccount",
+			"2. findAccount",
+			"3. deleteAccount",
+			"4. exit",
+			"5. chose variant",
+		})
 		switch variant {
-		case 1:
+		case "1":
 			createAccount(vault)
-		case 2:
+		case "2":
 			findAccount(vault)
-		case 3:
+		case "3":
 			deleteAccount(vault)
 		default:
 			break Menu
@@ -30,20 +36,8 @@ Menu:
 
 }
 
-func getMenu() int {
-	var variant int
-	fmt.Println("Chose variant")
-	fmt.Println("1 Create account")
-	fmt.Println("2 Find accont")
-	fmt.Println("3 Delete account")
-	fmt.Println("4 Exit")
-	fmt.Scan(&variant)
-	return variant
-
-}
-
 func findAccount(vault *account.VaultWithDb) {
-	url := promptData("Add url")
+	url := promptData([]string{"Add url"})
 	accounts := vault.FindAccountsByUrl(url)
 	if len(accounts) == 0 {
 		color.Yellow("No account")
@@ -55,7 +49,7 @@ func findAccount(vault *account.VaultWithDb) {
 
 func deleteAccount(vault *account.VaultWithDb) {
 
-	url := promptData("Add url for delete")
+	url := promptData([]string{"enter url for delete"})
 	isDeleted := vault.DeleteAccoutByUrl(url)
 	if isDeleted {
 		color.Green("Delete")
@@ -65,9 +59,9 @@ func deleteAccount(vault *account.VaultWithDb) {
 }
 
 func createAccount(vault *account.VaultWithDb) {
-	login := promptData("add log")
-	password := promptData("add_pass")
-	url := promptData("add url")
+	login := promptData([]string{"Add login"})
+	password := promptData([]string{"Add password"})
+	url := promptData([]string{"Add url"})
 
 	myAccount, err := account.NewAccount(login, password, url)
 	if err != nil {
@@ -77,8 +71,14 @@ func createAccount(vault *account.VaultWithDb) {
 	vault.AddAccount(*myAccount)
 }
 
-func promptData(prompt string) string {
-	fmt.Println(prompt + ": ")
+func promptData[T any](prompt []T) string {
+	for i, line := range prompt {
+		if i == len(prompt)-1 {
+			fmt.Printf("%v: ", line)
+		} else {
+			fmt.Println(line)
+		}
+	}
 	var res string
 	fmt.Scan(&res)
 	return res
