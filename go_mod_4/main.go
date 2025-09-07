@@ -5,9 +5,16 @@ import (
 	"main/account"
 	"main/files"
 	"main/output"
+	"strings"
 
 	"github.com/fatih/color"
 )
+
+var menu = map[string]func(*account.VaultWithDb){
+	"1": createAccount,
+	"2": findAccount,
+	"3": deleteAccount,
+}
 
 func main() {
 	fmt.Println("I am manager of password")
@@ -21,30 +28,39 @@ Menu:
 			"4. exit",
 			"5. chose variant",
 		})
-		switch variant {
-		case "1":
-			createAccount(vault)
-		case "2":
-			findAccount(vault)
-		case "3":
-			deleteAccount(vault)
-		default:
+		menuFunc := menu[variant]
+		if menuFunc == nil {
 			break Menu
-
 		}
+		menuFunc(vault)
+		// switch variant {
+		// case "1":
+		// 	createAccount(vault)
+		// case "2":
+		// 	findAccount(vault)
+		// case "3":
+		// 	deleteAccount(vault)
+		// default:
+		// 	break Menu
+
+		// }
 	}
 
 }
 
 func findAccount(vault *account.VaultWithDb) {
 	url := promptData([]string{"Add url"})
-	accounts := vault.FindAccountsByUrl(url)
+	accounts := vault.FindAccounts(url, check_url)
 	if len(accounts) == 0 {
 		color.Yellow("No account")
 	}
 	for _, account := range accounts {
 		account.Output()
 	}
+}
+
+func check_url(acc account.Account, str string) bool {
+	return strings.Contains(acc.Url, str)
 }
 
 func deleteAccount(vault *account.VaultWithDb) {
