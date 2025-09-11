@@ -2,6 +2,7 @@ package account
 
 import (
 	"encoding/json"
+	"main/encrypter"
 	"main/output"
 	"strings"
 	"time"
@@ -29,10 +30,11 @@ type Vault struct {
 
 type VaultWithDb struct {
 	Vault
-	db Db
+	db  Db
+	enc encrypter.Encrypter
 }
 
-func NewVault(db Db) *VaultWithDb {
+func NewVault(db Db, enc encrypter.Encrypter) *VaultWithDb {
 	file, err := db.Read()
 	if err != nil {
 		// Если не удалось прочитать файл — создаём пустой Vault
@@ -41,7 +43,8 @@ func NewVault(db Db) *VaultWithDb {
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: db,
+			db:  db,
+			enc: enc,
 		}
 	}
 
@@ -55,7 +58,8 @@ func NewVault(db Db) *VaultWithDb {
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: db,
+			db:  db,
+			enc: enc,
 		}
 	}
 
@@ -63,6 +67,7 @@ func NewVault(db Db) *VaultWithDb {
 	return &VaultWithDb{
 		Vault: vault,
 		db:    db,
+		enc:   enc,
 	}
 }
 

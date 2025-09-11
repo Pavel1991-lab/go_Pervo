@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"main/account"
+	"main/encrypter"
 	"main/files"
 	"main/output"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/joho/godotenv"
 )
 
 var menu = map[string]func(*account.VaultWithDb){
@@ -17,18 +19,36 @@ var menu = map[string]func(*account.VaultWithDb){
 	"4": deleteAccount,
 }
 
+var menuVariants = []string{
+	"1. createAccount",
+	"2. findAccount by url",
+	"3. findAccount by login",
+	"4. deleteAccount",
+	"5. exit",
+}
+
+func manuCounter() func() {
+	i := 0
+	return func() {
+		i++
+		fmt.Println(i)
+	}
+}
+
 func main() {
 	fmt.Println("I am manager of password")
-	vault := account.NewVault(files.NewJsonDb(("data.json")))
+	err := godotenv.Load()
+	if err != nil {
+		output.PrintError("Do not find env file")
+	}
+	vault := account.NewVault(files.NewJsonDb("data.json"), *encrypter.NewEncrypter())
+	conunter := manuCounter()
 Menu:
 	for {
-		variant := promptData([]string{
-			"1. createAccount",
-			"2. findAccount by url",
-			"3. findAccount by login",
-			"4. deleteAccount",
-			"5. exit",
-		})
+		conunter()
+		variant := promptData(
+			menuVariants...,
+		)
 		menuFunc := menu[variant]
 		if menuFunc == nil {
 			break Menu
@@ -50,7 +70,7 @@ Menu:
 }
 
 func findAccountByUrl(vault *account.VaultWithDb) {
-	url := promptData([]string{"Add url"})
+	url := promptData("Add url")
 	accounts := vault.FindAccounts(url, func(acc account.Account, str string) bool {
 		return strings.Contains(acc.Url, str)
 	})
@@ -59,7 +79,7 @@ func findAccountByUrl(vault *account.VaultWithDb) {
 }
 
 func findAccountByLogin(vault *account.VaultWithDb) {
-	login := promptData([]string{"Add login"})
+	login := promptData("Add login")
 	accounts := vault.FindAccounts(login, func(acc account.Account, str string) bool {
 		return strings.Contains(acc.Login, str)
 	})
@@ -77,7 +97,7 @@ func outputResult(accounts *[]account.Account) {
 
 func deleteAccount(vault *account.VaultWithDb) {
 
-	url := promptData([]string{"enter url for delete"})
+	url := promptData("enter url for delete")
 	isDeleted := vault.DeleteAccoutByUrl(url)
 	if isDeleted {
 		color.Green("Delete")
@@ -87,9 +107,9 @@ func deleteAccount(vault *account.VaultWithDb) {
 }
 
 func createAccount(vault *account.VaultWithDb) {
-	login := promptData([]string{"Add login"})
-	password := promptData([]string{"Add password"})
-	url := promptData([]string{"Add url"})
+	login := promptData("Add login")
+	password := promptData("Add password")
+	url := promptData("Add url")
 
 	myAccount, err := account.NewAccount(login, password, url)
 	if err != nil {
@@ -99,7 +119,7 @@ func createAccount(vault *account.VaultWithDb) {
 	vault.AddAccount(*myAccount)
 }
 
-func promptData[T any](prompt []T) string {
+func promptData(prompt ...string) string {
 	for i, line := range prompt {
 		if i == len(prompt)-1 {
 			fmt.Printf("%v: ", line)
